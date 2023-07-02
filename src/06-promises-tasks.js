@@ -101,25 +101,28 @@ function getFastestPromise(array) {
  *    });
  *
  */
-function chainPromises(/* array, action */) {
-  throw new Error('Not implemented');
-  // const promise = new Promise((resolve) => {
-  //   const result = [];
-  //   let total = 0;
-  //   array.forEach((item, index) => {
-  //     Promise.resolve(item)
-  //       .then((res) => {
-  //         result[index] = res;
-  //         total += 1;
-  //         if (total === array.length) resolve(result.reduce(action));
-  //       })
-  //       .catch(() => {
-  //         // reject(console.log(err.message));
-  //         // throw new Error('Error!');
-  //       });
-  //   });
-  // });
-  // return promise;
+function chainPromises(array, action) {
+  // throw new Error('Not implemented');
+  const promise = new Promise((resolve, reject) => {
+    let total = 0;
+    const result = [];
+    array.forEach((item, index) => {
+      Promise.resolve(item)
+        .then((res) => {
+          result[index] = res;
+          total += 1;
+          if (total === array.length) {
+            resolve(result);
+          }
+        })
+        .catch((err) => reject(err));
+    });
+  })
+
+    .then((res) => res.reduce(action))
+    // eslint-disable-next-line no-console
+    .catch((err) => console.log(err));
+  return promise;
 }
 
 module.exports = {

@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 /* ************************************************************************************************
  *                                                                                                *
  * Please read the following tutorial before implementing tasks:                                   *
@@ -112,33 +113,151 @@ function fromJSON(proto, json) {
  *  For more examples see unit tests.
  */
 
+class CSSSelector {
+  constructor() {
+    this.selector = '';
+    this.hasElement = false;
+    this.hasId = false;
+    this.hasClass = false;
+    this.hasAttr = false;
+    this.hasPseudoClass = false;
+    this.hasPseudoElement = false;
+    this.lastPart = null;
+  }
+
+  element(value) {
+    if (this.hasElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+    this.checkOrder('element');
+    const newSelector = new CSSSelector();
+    newSelector.selector = this.selector + value;
+    newSelector.hasElement = true;
+    newSelector.lastPart = 'element';
+    return newSelector;
+  }
+
+  id(value) {
+    if (this.hasId) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+    this.checkOrder('id');
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}#${value}`;
+    newSelector.hasId = true;
+    newSelector.lastPart = 'id';
+    return newSelector;
+  }
+
+  class(value) {
+    this.checkOrder('class');
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}.${value}`;
+    newSelector.lastPart = 'class';
+    return newSelector;
+  }
+
+  attr(value) {
+    this.checkOrder('attribute');
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}[${value}]`;
+    newSelector.lastPart = 'attribute';
+    return newSelector;
+  }
+
+  pseudoClass(value) {
+    this.checkOrder('pseudo-class');
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}:${value}`;
+    newSelector.lastPart = 'pseudo-class';
+    return newSelector;
+  }
+
+  pseudoElement(value) {
+    if (this.hasPseudoElement) {
+      throw new Error(
+        'Element, id and pseudo-element should not occur more then one time inside the selector',
+      );
+    }
+    this.checkOrder('pseudo-element');
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${this.selector}::${value}`;
+    newSelector.hasPseudoElement = true;
+    newSelector.lastPart = 'pseudo-element';
+    return newSelector;
+  }
+
+  combine(selector1, combinator, selector2) {
+    const newSelector = new CSSSelector();
+    newSelector.selector = `${selector1.selector} ${combinator} ${selector2.selector}`;
+    return newSelector;
+  }
+
+  stringify() {
+    return this.selector;
+  }
+
+  checkOrder(part) {
+    if (
+      this.lastPart
+      && this.getPartIndex(part) < this.getPartIndex(this.lastPart)
+    ) {
+      throw new Error(
+        `Selector parts should be arranged in the following order: element, id, class, attribute, pseudo-class, pseudo-element. Invalid order: ${this.lastPart} followed by ${part}`,
+      );
+    }
+  }
+
+  getPartIndex(part) {
+    const order = [
+      'element',
+      'id',
+      'class',
+      'attribute',
+      'pseudo-class',
+      'pseudo-element',
+    ];
+    return order.indexOf(part);
+  }
+}
+
 const cssSelectorBuilder = {
-  element(/* value */) {
-    throw new Error('Not implemented');
+  element(value) {
+    return new CSSSelector().element(value);
   },
 
-  id(/* value */) {
-    throw new Error('Not implemented');
+  id(value) {
+    const selector = new CSSSelector();
+    return selector.id(value);
   },
 
-  class(/* value */) {
-    throw new Error('Not implemented');
+  class(value) {
+    const selector = new CSSSelector();
+    return selector.class(value);
   },
 
-  attr(/* value */) {
-    throw new Error('Not implemented');
+  attr(value) {
+    const selector = new CSSSelector();
+    return selector.attr(value);
   },
 
-  pseudoClass(/* value */) {
-    throw new Error('Not implemented');
+  pseudoClass(value) {
+    const selector = new CSSSelector();
+    return selector.pseudoClass(value);
   },
 
-  pseudoElement(/* value */) {
-    throw new Error('Not implemented');
+  pseudoElement(value) {
+    const selector = new CSSSelector();
+    return selector.pseudoElement(value);
   },
 
-  combine(/* selector1, combinator, selector2 */) {
-    throw new Error('Not implemented');
+  combine(selector1, combinator, selector2) {
+    const newSelector = new CSSSelector();
+    return newSelector.combine(selector1, combinator, selector2);
   },
 };
 
